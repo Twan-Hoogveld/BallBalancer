@@ -6,6 +6,15 @@ import cv2
 import imutils
 import time
 
+#Camera Used
+cam = 0
+
+#BGR Colors
+orange_webcam = np.uint8([[[80, 177, 255]]])
+blue_webcam = np.uint8([[[231, 138, 0]]])
+orange_ps_cam = np.uint8([[[147, 184, 213]]])
+
+
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video",
@@ -18,21 +27,27 @@ args = vars(ap.parse_args())
 # ball in the HSV color space, then initialize the
 # list of tracked points
 
-orange = np.uint8([[[147, 184, 213]]]) #B G R 
-hsvOrange = cv2.cvtColor(orange,cv2.COLOR_BGR2HSV)
+if not cam:
+    ball = orange_webcam
+    blue = blue_webcam
+else:
+    ball = orange_ps_cam
+
+
+hsvOrange = cv2.cvtColor(ball,cv2.COLOR_BGR2HSV)
 print(hsvOrange)
-lowerLimit = (hsvOrange[0][0][0]-10,100,100)
-upperLimit = (hsvOrange[0][0][0]+10,255,255)
-print(upperLimit)
-print(lowerLimit)
-greenLower = np.array([7,100,100])
-greenUpper = np.array([35,255,255])
+ball_lower = np.array([hsvOrange[0][0][0] -10,100,100])
+ball_upper = np.array([hsvOrange[0][0][0] +10, 255,255])
+print(ball_lower)
+print(ball_upper)
+
+
 pts = deque(maxlen=args["buffer"])
 
 # if a video path was not supplied, grab the reference
 # to the webcam (0 IS WEBCAM, 1 IS PS3 CAM)
 if not args.get("video", False):
-	vs = VideoStream(src=1).start()
+	vs = VideoStream(src=cam).start()
 
 	# otherwise, grab a reference to the video file
 else:
@@ -63,7 +78,7 @@ while True:
 	# construct a mask for the color "green", then perform
 	# a series of dilations and erosions to remove any small
 	# blobs left in the mask
-	mask = cv2.inRange(hsv, greenLower, greenUpper)
+	mask = cv2.inRange(hsv, ball_lower, ball_upper)
 	mask = cv2.erode(mask, None, iterations=2)
 	mask = cv2.dilate(mask, None, iterations=2)
 
@@ -89,7 +104,7 @@ while True:
 			# draw the circle and centroid on the frame,
 			# then update the list of tracked points
 			cv2.circle(frame, (int(x), int(y)), int(radius),
-				(0, 255, 255), 2)
+				(255, 255, 255), 2)
 			cv2.circle(frame, center, 5, (0, 0, 255), -1)
 
 	# update the points queue
