@@ -47,7 +47,7 @@ else:
     ball = orange_ps_cam
 
 
-hsvOrange = cv2.cvtColor(blue, cv2.COLOR_BGR2HSV)
+hsvOrange = cv2.cvtColor(ball, cv2.COLOR_BGR2HSV)
 print(hsvOrange)
 ball_lower = np.array([hsvOrange[0][0][0] - 10, 100, 100])
 ball_upper = np.array([hsvOrange[0][0][0] + 10, 255, 255])
