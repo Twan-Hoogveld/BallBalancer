@@ -9,9 +9,15 @@ import time
 import cv2
 import threading
 
+
+
 def print_xy(x,y):
     threading.Timer(0.2, print_xy).start()
     print(x, y)
+
+setpoint = 0
+ball_height = 0
+
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -69,9 +75,18 @@ while True:
     # seletc ball first
     # then setpoint
     for box in boxes:
-        (x, y, w, h) = [int(v) for v in box]
-        #cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        print_xy(x,y)
+        #first selectino is ball
+        if box == boxes[0]:
+            (x, y, w, h) = [int(v) for v in box]
+            #cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            print_xy(x,y)
+            ball_height = y;
+        #second selection is setpoint
+        else if box == boxes[1]:
+            (x, y, w, h) = [int(v) for v in box]
+            #cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            print_xy(x,y)
+            setpoint = y
 
 
 
