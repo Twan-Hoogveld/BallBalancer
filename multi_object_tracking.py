@@ -9,14 +9,42 @@ import time
 import cv2
 import threading
 
+#init time
+old_time = int(round(time.time() * 1000))
+
+#Printing threading
+
+def print_ball_height(y):
+    time.sleep(0.5)
+    print("ball :", y)
+
+def print_setpoint(y):
+    time.sleep(0.5)
+    print("setpoint :" ,y)
+
+threads = []
 
 
-def print_xy(x,y):
-    threading.Timer(0.2, print_xy).start()
-    print(x, y)
 
-setpoint = 0
-ball_height = 0
+#PID
+error_old = 0
+kp = 1
+ki = 1
+kd = 1
+
+def pid_control(ball_height, setpoint, delta_time = 0.2, ):
+    global error_old
+    ie = 0
+    error_new = setpoint - ball_height
+    delta_error = error_new-error_old
+    delta_time = 0.01
+    ie += error_new
+
+    error_old = error_new
+    total_action = kp * error_new + kd * (delta_error/delta_time)+ ki * ie
+    print("total : ", total_action)
+
+
 
 
 # construct the argument parser and parse the arguments
@@ -74,20 +102,44 @@ while True:
     # boxes is number of objects
     # seletc ball first
     # then setpoint
+    counter = 0
     for box in boxes:
-        #first selectino is ball
-        if box == boxes[0]:
+        #first selection is ball
+        if counter == 0:
             (x, y, w, h) = [int(v) for v in box]
             #cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            print_xy(x,y)
-            ball_height = y;
-        #second selection is setpoint
-        else if box == boxes[1]:
-            (x, y, w, h) = [int(v) for v in box]
-            #cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            print_xy(x,y)
-            setpoint = y
 
+            ball_height = y;
+            t = threading.Thread(target=print_ball_height, args=(ball_height,))
+            threads.append(t)
+            t.start()
+        #second selection is setpoint
+        elif counter == 1:
+            (x, y, w, h) = [int(v) for v in box]
+            #cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            setpoint = y
+            d = threading.Thread(target=print_setpoint, args=(setpoint,))
+            threads.append(d)
+            d.start()
+        counter += 1
+
+
+    # old_time = 0
+    # if len(boxes) == 2:
+    #     current_time = int(round(time.time() * 1000))
+    #     # Each 0.2 Seconds recalculate
+    #     if current_time-old_time > 200:
+    #         pid_control(ball_height, setpoint)
+    #     old_time = current_time
+
+
+    if len(boxes) == 2:
+        time_new = int(round(time.time() * 1000))
+        delta_time = old_time - time_new
+        tr = threading.Thread(target=pid_control, args=(ball_height, setpoint,delta_time))
+        threads.append(tr)
+        tr.start()
+        old_time = time_new
 
 
     # show the output frame
@@ -96,7 +148,7 @@ while True:
 
     # if the 's' key is selected, we are going to "select" a bounding
     # box to track
-    if key == ord("s"):
+    if key == ord("p"):
         # select the bounding box of the object we want to track (make
         # sure you press ENTER or SPACE after selecting the ROI)
         box = cv2.selectROI("Frame", frame, fromCenter=False,
