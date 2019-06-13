@@ -1,0 +1,5 @@
+{
+    "port": "COM2",
+    "board": "arduino:sam:arduino_due_x_dbg",
+    "sketch": "arduino_code.ino"
+}
