@@ -19,7 +19,7 @@ ap.add_argument("-b", "--buffer", type=int, default=64,
 args = vars(ap.parse_args())
 
 # define the lower and upper boundaries of the colors in the HSV color space
-lower = {'green':(66, 122, 129),'orange':(0, 60, 87)}
+lower = {'green':(40, 35, 35),'orange':(0, 60, 87)} 
 upper = {'green':(90,255,255), 'orange':(20,255,255)}
 
 # define standard colors for circle around the object
